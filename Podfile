@@ -5,7 +5,7 @@
 
 target 'AWAudioKitDemo' do
 
-pod 'AWAudioKit', :path => './AWAudioKit'
+pod 'AWAudioKit', :path => './AudioKit'
 
 end
 
