@@ -2,7 +2,7 @@
 //  main.m
 //  AWAudioKitDemo
 //
-//  Created by mafengwo on 16/2/16.
+//  Created by AldaronWang on 16/2/16.
 //  Copyright © 2016年 Aldaron. All rights reserved.
 //
 

@@ -2,7 +2,7 @@
 //  AWAudioRecorder.m
 //  Pods
 //
-//  Created by mafengwo on 16/2/16.
+//  Created by AldaronWang on 16/2/16.
 //
 //
 
