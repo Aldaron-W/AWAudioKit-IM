@@ -25,11 +25,23 @@
 
 #define kAWAudioRecorderErrorDomain @"AWAudioRecorderErrorDomain"
 
+#define AW_RecallErrorAndReturn(error) \
+    if (error) {\
+        AW_RecallError(error);\
+        return ;\
+    }
+
+#define AW_RecallErrorWithErrorCode(errorCode) AW_RecallError([self getErrorWithErrorCode:errorCode])
+
+#define AW_RecallError(error) [self recallErrorInfo:error]
+
 @interface AWAudioRecorder (){
     //音频输入队列
     AudioQueueRef				_audioQueue;
     //音频输入数据format
     AudioStreamBasicDescription	_recordFormat;
+    //音频输入缓冲区
+    AudioQueueBufferRef	_audioBuffers[kAW_NumberAudioQueueBuffers];
 }
 
 /**
@@ -83,7 +95,7 @@
         }
     }
     else{
-        [self recallErrorInfo:[self getErrorWithErrorCode:AWLAudioRecorderErrorCodeDoublePerformStopRecordingMethod]];
+        AW_RecallErrorWithErrorCode(AWAudioRecorderErrorCodeDoublePerformStopRecordingMethod);
     }
 }
 
@@ -106,7 +118,70 @@
 
 - (void)prepareAudioSession{
     NSError *error = nil;
+    OSStatus errorCode = noErr;
+    
     [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayAndRecord error:&error];
+    AW_RecallErrorAndReturn(error)
+    
+    [[AVAudioSession sharedInstance] setActive:YES error:&error];
+    AW_RecallErrorAndReturn(error)
+    
+    _recordFormat.mSampleRate = self.sampleRate;
+    
+    errorCode = AudioQueueNewInput(&_recordFormat, inputBufferHandler, (__bridge void *)(self), NULL, NULL, 0, &_audioQueue);
+    if (errorCode != noErr) {
+        AW_RecallErrorWithErrorCode(AWAudioRecorderErrorCodeAboutQueue);
+        return;
+    }
+    
+    //计算估算的缓存区大小
+    int frames = (int)ceil(self.bufferDurationSeconds * _recordFormat.mSampleRate);
+    int bufferByteSize = frames * _recordFormat.mBytesPerFrame;
+    
+    //创建缓冲器
+    for (int i = 0; i < kAW_NumberAudioQueueBuffers; ++i){
+        errorCode = AudioQueueAllocateBuffer(_audioQueue, bufferByteSize, &_audioBuffers[i]);
+        if (errorCode != noErr) {
+            AW_RecallErrorWithErrorCode(AWAudioRecorderErrorCodeAboutQueue);
+            return;
+        }
+        errorCode = AudioQueueEnqueueBuffer(_audioQueue, _audioBuffers[i], 0, NULL);
+        if (errorCode != noErr) {
+            AW_RecallErrorWithErrorCode(AWAudioRecorderErrorCodeAboutQueue);
+            return;
+        }
+    }
+    
+    //开始录音
+    AudioQueueStart(_audioQueue, NULL);
+    if (errorCode != noErr) {
+        AW_RecallErrorWithErrorCode(AWAudioRecorderErrorCodeAboutQueue);
+        return;
+    }
+    
+    self.isRecording = YES;
+}
+
+// 回调函数
+void inputBufferHandler(void *inUserData, AudioQueueRef inAQ, AudioQueueBufferRef inBuffer, const AudioTimeStamp *inStartTime,UInt32 inNumPackets, const AudioStreamPacketDescription *inPacketDesc)
+{
+    AWAudioRecorder *recorder = (__bridge AWAudioRecorder*)inUserData;
+    
+    if (inNumPackets > 0) {
+        NSData *pcmData = [[NSData alloc]initWithBytes:inBuffer->mAudioData length:inBuffer->mAudioDataByteSize];
+        if (pcmData&&pcmData.length>0) {
+            //TODO: 写入文件
+        }
+    }
+    if (recorder.isRecording) {
+        if(AudioQueueEnqueueBuffer(inAQ, inBuffer, 0, NULL)!=noErr){
+            recorder.isRecording = NO; //这里直接设置下，能防止队列中3个缓存，重复post error
+            //回到主线程
+            dispatch_async(dispatch_get_main_queue(),^{
+                [recorder recallErrorInfo:[recorder getErrorWithErrorCode:AWAudioRecorderErrorCodeAboutQueue]];
+            });
+        }
+    }
 }
 
 #pragma mark - Tools
@@ -138,16 +213,16 @@
         case AWAudioRecorderErrorCodeAboutFile:
             description = @"关于文件操作的错误";
             break;
-        case AWLAudioRecorderErrorCodeAboutQueue:
+        case AWAudioRecorderErrorCodeAboutQueue:
             description = @"关于音频输入队列的错误";
             break;
         case AWAudioRecorderErrorCodeAboutSession:
             description = @"关于audio session的错误";
             break;
-        case AWLAudioRecorderErrorCodeDoublePerformStartRecordingMethod:
+        case AWAudioRecorderErrorCodeDoublePerformStartRecordingMethod:
             description = @"重复调用StartRecording函数";
             break;
-        case AWLAudioRecorderErrorCodeDoublePerformStopRecordingMethod:
+        case AWAudioRecorderErrorCodeDoublePerformStopRecordingMethod:
             description = @"重复调用StopRecording函数";
             break;
         case AWAudioRecorderErrorCodeAboutOther:

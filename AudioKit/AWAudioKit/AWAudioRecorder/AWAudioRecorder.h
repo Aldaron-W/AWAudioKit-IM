@@ -23,7 +23,7 @@ typedef NS_ENUM(NSUInteger, AWAudioRecorderErrorCode) {
     /**
      *  关于音频输入队列的错误
      */
-    AWLAudioRecorderErrorCodeAboutQueue = 10,
+    AWAudioRecorderErrorCodeAboutQueue = 10,
     /**
      *  关于audio session的错误
      */
@@ -32,11 +32,11 @@ typedef NS_ENUM(NSUInteger, AWAudioRecorderErrorCode) {
     /**
      *  重复调用StartRecording函数
      */
-    AWLAudioRecorderErrorCodeDoublePerformStartRecordingMethod = 30,
+    AWAudioRecorderErrorCodeDoublePerformStartRecordingMethod = 30,
     /**
      *  重复调用StopRecording函数
      */
-    AWLAudioRecorderErrorCodeDoublePerformStopRecordingMethod,
+    AWAudioRecorderErrorCodeDoublePerformStopRecordingMethod,
     //====================      Others      ====================
     /**
      *  其他
