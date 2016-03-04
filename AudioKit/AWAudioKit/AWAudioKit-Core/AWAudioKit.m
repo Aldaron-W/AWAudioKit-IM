@@ -6,9 +6,9 @@
 //
 //
 
-#import "AWAudioRecorder.h"
+#import "AWAudioKit.h"
 
-@implementation AWAudioRecorder
+@implementation AWAudioKit
 
 - (instancetype)init{
     self = [super init];

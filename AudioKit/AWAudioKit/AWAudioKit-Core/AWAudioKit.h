@@ -14,18 +14,18 @@
 //#import "MLAudioPlayer.h"
 //#import "AmrPlayerReader.h"
 
-@class AWAudioRecorder;
+@class AWAudioKit;
 
-@protocol AWAudioRecorderDelegate <NSObject>
+@protocol AWAudioKitDelegate <NSObject>
 
-- (void)audioRecorder:(AWAudioRecorder *)audioRecorder currentRecordVolume:(float)volume;
+- (void)audioRecorder:(AWAudioKit *)audioRecorder currentRecordVolume:(float)volume;
 
 @end
 
-@interface AWAudioRecorder : NSObject
+@interface AWAudioKit : NSObject
 
 //Delegate
-@property (nonatomic, weak) id<AWAudioRecorderDelegate> delegate;
+@property (nonatomic, weak) id<AWAudioKitDelegate> delegate;
 
 //Recording...
 //@property (nonatomic, strong) MLAudioRecorder *recorder;

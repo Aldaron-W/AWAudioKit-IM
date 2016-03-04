@@ -8,15 +8,15 @@
 
 #import <UIKit/UIKit.h>
 
-#import <AWAudioKit/AWAudioKit-Core/AWAudioRecorder.h>
+#import <AWAudioKit/AWAudioKit-Core/AWAudioKit.h>
 
-@interface ViewController : UIViewController <AWAudioRecorderDelegate>
+@interface ViewController : UIViewController <AWAudioKitDelegate>
 
 @property (weak, nonatomic) IBOutlet UILabel *tipLabel;
 @property (weak, nonatomic) IBOutlet UIButton *recordButton;
 
 #pragma mark Record
-@property (nonatomic, strong) AWAudioRecorder *audioRecorder;
+@property (nonatomic, strong) AWAudioKit *audioRecorder;
 
 @end
 

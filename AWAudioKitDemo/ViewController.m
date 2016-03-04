@@ -26,7 +26,7 @@
 }
 
 #pragma mark - AWAudioRecorderDelegate
-- (void)audioRecorder:(AWAudioRecorder *)audioRecorder currentRecordVolume:(float)volume{
+- (void)audioRecorder:(AWAudioKit *)audioRecorder currentRecordVolume:(float)volume{
     
 }
 
@@ -36,9 +36,9 @@
 }
 
 #pragma mark - Getter
-- (AWAudioRecorder *)audioRecorder{
+- (AWAudioKit *)audioRecorder{
     if (!_audioRecorder) {
-        _audioRecorder = [[AWAudioRecorder alloc] init];
+        _audioRecorder = [[AWAudioKit alloc] init];
         [_audioRecorder setDelegate:self];
     }
     return _audioRecorder;
