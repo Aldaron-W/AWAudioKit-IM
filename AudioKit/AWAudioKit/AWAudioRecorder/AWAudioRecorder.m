@@ -23,7 +23,7 @@
  */
 #define kAW_DefaultSampleRate 8000
 
-#define kAWAudioRecorderErrorDomain @"AWAudioRecorderErrorDomain"
+#define kAW_AudioRecorderErrorDomain @"AWAudioRecorderErrorDomain"
 
 #define AW_RecallErrorAndReturn(error) \
     if (error) {\
@@ -80,6 +80,10 @@
     return self;
 }
 
+- (void)dealloc{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
 #pragma mark - Public methods
 - (void)startRecording{
     
@@ -120,14 +124,19 @@
     NSError *error = nil;
     OSStatus errorCode = noErr;
     
+    //设置AVAudioSession的Category
     [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayAndRecord error:&error];
     AW_RecallErrorAndReturn(error)
     
+    //设置AVAudioSession的Active状态
     [[AVAudioSession sharedInstance] setActive:YES error:&error];
     AW_RecallErrorAndReturn(error)
     
+    
+    //TODO:从Delegate获取录音的Formate
     _recordFormat.mSampleRate = self.sampleRate;
     
+    //设定录音的回调函数
     errorCode = AudioQueueNewInput(&_recordFormat, inputBufferHandler, (__bridge void *)(self), NULL, NULL, 0, &_audioQueue);
     if (errorCode != noErr) {
         AW_RecallErrorWithErrorCode(AWAudioRecorderErrorCodeAboutQueue);
@@ -184,6 +193,38 @@ void inputBufferHandler(void *inUserData, AudioQueueRef inAQ, AudioQueueBufferRe
     }
 }
 
+#pragma mark Audio Format
+// 设置录音格式
+- (void)setupAudioFormat:(UInt32) inFormatID SampleRate:(int)sampeleRate
+{
+    //重置下
+    memset(&_recordFormat, 0, sizeof(_recordFormat));
+    
+    //设置采样率，这里先获取系统默认的测试下 //TODO:
+    //采样率的意思是每秒需要采集的帧数
+    _recordFormat.mSampleRate = sampeleRate;//[[AVAudioSession sharedInstance] sampleRate];
+    
+    //设置通道数,这里先使用系统的测试下 //TODO:
+    _recordFormat.mChannelsPerFrame = 1;//(UInt32)[[AVAudioSession sharedInstance] inputNumberOfChannels];
+    
+    //    //DLOG(@"sampleRate:%f,通道数:%d",_recordFormat.mSampleRate,_recordFormat.mChannelsPerFrame);
+    
+    //设置format，怎么称呼不知道。
+    _recordFormat.mFormatID = inFormatID;
+    
+    if (inFormatID == kAudioFormatLinearPCM){
+        //这个屌属性不知道干啥的。，
+        _recordFormat.mFormatFlags = kLinearPCMFormatFlagIsSignedInteger | kLinearPCMFormatFlagIsPacked;
+        //每个通道里，一帧采集的bit数目
+        _recordFormat.mBitsPerChannel = 16;
+        //结果分析: 8bit为1byte，即为1个通道里1帧需要采集2byte数据，再*通道数，即为所有通道采集的byte数目。
+        //所以这里结果赋值给每帧需要采集的byte数目，然后这里的packet也等于一帧的数据。
+        //至于为什么要这样。。。不知道。。。
+        _recordFormat.mBytesPerPacket = _recordFormat.mBytesPerFrame = (_recordFormat.mBitsPerChannel / 8) * _recordFormat.mChannelsPerFrame;
+        _recordFormat.mFramesPerPacket = 1;
+    }
+}
+
 #pragma mark - Tools
 #pragma mark Recall Error
 - (void)recallErrorInfoAndStopRecording:(NSError *)error{
@@ -231,7 +272,7 @@ void inputBufferHandler(void *inUserData, AudioQueueRef inAQ, AudioQueueBufferRe
             break;
     }
     
-    error = [NSError errorWithDomain:kAWAudioRecorderErrorDomain code:errorCode userInfo:@{NSLocalizedDescriptionKey:description}];
+    error = [NSError errorWithDomain:kAW_AudioRecorderErrorDomain code:errorCode userInfo:@{NSLocalizedDescriptionKey:description}];
     
     return error;
 }
