@@ -6,6 +6,14 @@
 //
 //
 
+/*
+    AWAudioMeterObserver
+    AWAudioMeterObserver类的主要功能是观察指定 AudioQueueRef 中获取当前录音的音量分贝数
+    并通过 - (void)AWAudioMeterObserver:(AWAudioMeterObserver *)observer currentLevelMetterStates:(NSArray *)levelMeterStates 函数返回给 degegate
+ 
+    若获取的过程当中出现异常的话则会通过 - (void)AWAudioMeterObserver:(AWAudioMeterObserver *)observer error:(NSError *)error 函数返回给 degeagte
+ */
+
 #import <Foundation/Foundation.h>
 #import <AudioToolbox/AudioToolbox.h>
 
