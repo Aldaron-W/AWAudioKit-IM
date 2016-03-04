@@ -17,7 +17,7 @@ Pod::Spec.new do |s|
 
   )
 
-  s.source_files = 'AWAudioKit/**/*.{h,m,mm,c}'
+  # s.source_files = 'AWAudioKit/**/*.{h,m,mm,c}'
 
   s.header_dir = './'
 
@@ -38,7 +38,7 @@ Pod::Spec.new do |s|
   ]
 
   s.resources = ''
-  s.default_subspec = "AWAudioKit-Core"
+  s.default_subspec = "AWAudioKit-Core", "AWAudioRecorder"
 
   ## subspecs
   s.subspec 'AWAudioKit-Core' do |ss|
@@ -49,6 +49,15 @@ Pod::Spec.new do |s|
 
     ss.dependency	"AFNetworking", '2.6.0'
     ss.dependency	"YYCache"
+  end
+
+  s.subspec 'AWAudioRecorder' do |ss|
+    ss.header_dir = 'AWAudioKit/AWAudioRecorder/'
+    ss.public_header_files = 'AWAudioKit/AWAudioRecorder/**/*.h'
+    ss.source_files = 'AWAudioKit/AWAudioRecorder/**/*.{h,m}'
+    ss.resources = 'AWAudioKit/AWAudioRecorder/**/*.{png,xib,plist}'
+    ss.vendored_frameworks = 'AWAudioKit/AWAudioRecorder/Libraries/**/*.framework'
+    ss.vendored_libraries = 'AWAudioKit/AWAudioRecorder/Libraries/**/*.a'
   end
 
 
