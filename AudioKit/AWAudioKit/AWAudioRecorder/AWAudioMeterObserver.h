@@ -28,12 +28,17 @@
 
 /**
  *  AudioQueueLevelMeterState 结构体的OC替代类
+ *  Specifies the current level metering information for one channel of an audio queue.
+ *
+ *  @param mAveragePower The audio channel's average RMS power.
+ *
+ *  @param mPeakPower The audio channel's peak RMS power
+ *
  *  @see AudioQueueLevelMeterState
  */
 @interface AWLevelMeterState : NSObject
 @property (nonatomic, assign) Float32 mAveragePower;
 @property (nonatomic, assign) Float32 mPeakPower;
-
 @end
 
 @interface AWAudioMeterObserver : NSObject
