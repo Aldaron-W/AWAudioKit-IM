@@ -71,7 +71,7 @@
 - (void)setAudioQueue:(AudioQueueRef)audioQueue{
     NSError *error = nil;
     
-    if (_audioQueue!=NULL && audioQueue == _audioQueue){
+    if ((_audioQueue!=NULL && audioQueue == _audioQueue) || (audioQueue==NULL)){
         //一样的就无需再处理
         return;
     }
@@ -79,12 +79,6 @@
     //处理关闭定时器
     [self.timer invalidate];
     self.timer = nil;
-    
-    
-    //根据新的音频队列重新初始化_levelMeterStates的内存块
-    if (audioQueue==NULL){
-        return;
-    }
     
     _audioQueue = audioQueue;
     
