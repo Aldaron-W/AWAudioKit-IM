@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import <AudioToolbox/AudioToolbox.h>
+#import "AWFileWriterProtocol.h"
 
 /**
  *  错误标识
@@ -79,6 +80,11 @@ typedef NS_ENUM(NSUInteger, AWAudioRecorderErrorCode) {
  *  录音的相关回调
  */
 @property (nonatomic, weak) id<AWAudioRecorderDelegate> delegate;
+
+/**
+ *  处理写文件操作的，实际是转码的操作在其中进行。算作可扩展自定义的转码器
+ */
+@property (nonatomic, weak) id<AWFileWriterForAWAudioRecorder> fileWriterDelegate;
 
 #pragma mark - Public methods
 
