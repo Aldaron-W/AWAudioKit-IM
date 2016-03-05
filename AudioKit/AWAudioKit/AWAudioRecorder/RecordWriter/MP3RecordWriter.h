@@ -10,6 +10,6 @@
 #import "AWFileWriterProtocol.h"
 #import "AWAudioRecorder.h"
 
-@interface MP3RecordWriter : NSObject<AWFileWriterForMLAudioRecorder>
+@interface MP3RecordWriter : NSObject<AWFileWriterForAWAudioRecorder>
 
 @end
