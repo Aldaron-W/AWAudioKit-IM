@@ -8,93 +8,112 @@
 
 #import "AWAudioKit.h"
 
+#import "AWAudioRecorderHeader.h"
+
+@interface AWAudioKit () <AWAudioRecorderDelegate, AWAudioMeterObserverDelegate>
+
+@property (nonatomic, strong) AWAudioRecorder *recorder;
+@property (nonatomic, strong) AWAudioMeterObserver *meterObserver;
+@property (nonatomic, strong) id<AWFileWriterForAWAudioRecorder> fileWriter;
+
+//Private property
+@property (nonatomic, assign) AWAudioFormat audioFileType;
+
+@property (nonatomic, assign) BOOL isRecordingPrepare;
+
+@end
+
 @implementation AWAudioKit
 
 - (instancetype)init{
     self = [super init];
     if (self) {
-        [self prepareRecording];
+        
     }
     
     return self;
 }
 
-- (void)prepareRecording{
+- (void)prepareRecordingWithRecordingType:(AWAudioFormat)recordingType{
+    switch (recordingType) {
+        case kAWAudioFormat_MP3:{
+            self.fileWriter = [MP3RecordWriter new];
+            break;
+        }
+        default:{
+            //若为无法识别类型的则无法初始化录音对象
+            return;
+            break;
+        }
+    }
     
-//    AmrRecordWriter *amrWriter = [[AmrRecordWriter alloc] init];
-//    amrWriter.filePath = [self getAudioFilePath];
-//    amrWriter.maxSecondCount = 60;
-//    amrWriter.maxFileSize = 1024*256;
-//    self.amrWriter = amrWriter;
-//    
-//    MLAudioMeterObserver *meterObserver = [[MLAudioMeterObserver alloc]init];
-//    __weak __block typeof(self) wself = self;
-//    meterObserver.actionBlock = ^(NSArray *levelMeterStates,MLAudioMeterObserver *meterObserver){
-//        NSLog(@"volume:%f",[MLAudioMeterObserver volumeForLevelMeterStates:levelMeterStates]);
-//        float volume = [MLAudioMeterObserver volumeForLevelMeterStates:levelMeterStates];
-//        volume *= 5;
-//        
-//        volume = 25 + (40 * volume);
-//        
-//    };
-//    meterObserver.errorBlock = ^(NSError *error,MLAudioMeterObserver *meterObserver){
-//        //        [[[UIAlertView alloc]initWithTitle:@"错误" message:error.userInfo[NSLocalizedDescriptionKey] delegate:nil cancelButtonTitle:nil otherButtonTitles:@"知道了", nil]show];
-//    };
-//    self.meterObserver = meterObserver;
-//    
-//    MLAudioRecorder *recorder = [[MLAudioRecorder alloc]init];
-//    recorder.receiveStoppedBlock = ^{
-//        
-//            wself.meterObserver.audioQueue = nil;
-//            
-//            if (wself.amrWriter.recordedSecondCount < 1.0f) {
-////                [HintView hintViewWithText:@"录音时间过短，请重试" inView:wself.view];
-//                return;
-//            }
-//    };
-//    recorder.receiveErrorBlock = ^(NSError *error){
-//        //        [weakSelf.recordButton setTitle:@"Record" forState:UIControlStateNormal];
-//        wself.meterObserver.audioQueue = nil;
-//        
-//        [[[UIAlertView alloc]initWithTitle:@"错误" message:error.userInfo[NSLocalizedDescriptionKey] delegate:nil cancelButtonTitle:nil otherButtonTitles:@"知道了", nil]show];
-//    };
-//    
-//    recorder.fileWriterDelegate = amrWriter;
-//    recorder.bufferDurationSeconds = 0.25;
-//    self.filePath = amrWriter.filePath;
-//    
-//    self.recorder = recorder;
-//    
-//    MLAudioPlayer *player = [[MLAudioPlayer alloc]init];
-//    AmrPlayerReader *amrReader = [[AmrPlayerReader alloc]init];
-//    
-//    player.fileReaderDelegate = amrReader;
-//    player.receiveErrorBlock = ^(NSError *error){
-//        
-//        [[[UIAlertView alloc]initWithTitle:@"错误" message:error.userInfo[NSLocalizedDescriptionKey] delegate:nil cancelButtonTitle:nil otherButtonTitles:@"知道了", nil]show];
-//    };
-//    player.receiveStoppedBlock = ^{
-//        
-//    };
+    self.recorder.fileWriterDelegate = self.fileWriter;
 }
 
+#pragma mark - Private
 - (NSString *)getAudioFilePath{
-    NSString *path = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
-    NSString *fileName = [[NSProcessInfo processInfo] globallyUniqueString];
-    path = [path stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.amr",fileName]];
+    NSString *path = @"";
+    if (self.isRecordingPrepare) {
+        path = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
+        NSString *fileName = [[NSProcessInfo processInfo] globallyUniqueString];
+        path = [path stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.%@",fileName, [self getAudioFilePostfix]]];
+    }
+    
     return path;
 }
 
-- (void)recordingButtonAction:(id)item
-{
-//    if (self.recorder.isRecording) {
-//      //取消录音
-//        [self.recorder stopRecording];
-//    }else{
-        //开始录音
-//        [self.recorder startRecording];
-//        self.meterObserver.audioQueue = self.recorder->_audioQueue;
-//    }
+- (NSString *)getAudioFilePostfix{
+    switch (self.audioFileType) {
+        case kAWAudioFormat_MP3:
+            return @"mp3";
+            break;
+            
+        default:
+            return @"error";
+            break;
+    }
+}
+
+#pragma mark - Delegate
+#pragma mark AWAudioRecorderDelegate
+- (void)awAudioRecorderDidStartRecording:(AWAudioRecorder *)audioRecorder{
+    
+}
+- (void)awAudioRecorderDidStoppedRecording:(AWAudioRecorder *)audioRecorder{
+    
+}
+- (void)awAudioRecorderRecordingError:(AWAudioRecorder *)audioRecorder error:(NSError *)error{
+    
+}
+
+- (void)awAudioRecorder:(AWAudioRecorder *)audioRecorder currentVolume:(float)volume{
+    
+}
+
+#pragma mark AWAudioMeterObserverDelegate
+- (void)AWAudioMeterObserver:(AWAudioMeterObserver *)observer currentLevelMetterStates:(NSArray *)levelMeterStates{
+    
+}
+
+- (void)AWAudioMeterObserver:(AWAudioMeterObserver *)observer error:(NSError *)error{
+    
+}
+
+#pragma mark - Getter
+- (AWAudioRecorder *)recorder{
+    if (!_recorder) {
+        _recorder = [AWAudioRecorder new];
+        _recorder.delegate = self;
+    }
+    return _recorder;
+}
+
+- (AWAudioMeterObserver *)meterObserver{
+    if (!_meterObserver) {
+        _meterObserver = [AWAudioMeterObserver new];
+        _meterObserver.delegate = self;
+    }
+    return _meterObserver;
 }
 
 @end

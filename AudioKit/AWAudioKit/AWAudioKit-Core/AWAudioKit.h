@@ -16,8 +16,9 @@
 
 
 typedef enum : NSUInteger {
+    kAWAudioFormat_None,
     kAWAudioFormat_MP3,
-} kAWAudioFormat;
+} AWAudioFormat;
 
 @class AWAudioKit;
 
@@ -75,14 +76,10 @@ typedef enum : NSUInteger {
 //AWAudioKitDelegate
 @property (nonatomic, weak) id<AWAudioKitDelegate> delegate;
 
-//Recording...
-//@property (nonatomic, strong) MLAudioRecorder *recorder;
-//@property (nonatomic, strong) AmrRecordWriter *amrWriter;
-//@property (nonatomic, copy) NSString *filePath;
-//@property (nonatomic, strong) MLAudioMeterObserver *meterObserver;
+//Private property
+@property (nonatomic, assign, readonly) AWAudioFormat audioFileType;
 
-- (void)prepareRecording;
-
-- (void)recordingButtonAction:(id)item;
+#pragma mark - Public method
+- (void)prepareRecordingWithRecordingType:(AWAudioFormat)recordingType;
 
 @end
