@@ -14,12 +14,6 @@
     lame_t _lame;
 }
 
-@property (nonatomic, copy) NSString *filePath;
-@property (nonatomic, assign) unsigned long maxFileSize;
-@property (nonatomic, assign) double maxSecondCount;
-@property (nonatomic, assign) double recordedSecondCount;
-@property (nonatomic, assign) unsigned long recordedFileSize;
-
 @end
 
 @implementation MP3RecordWriter
@@ -76,6 +70,7 @@
             return YES;
         }
         self.recordedSecondCount += recoder.bufferDurationSeconds;
+        NSLog(@"%f", self.recordedSecondCount);
     }
     
     //编码
