@@ -54,8 +54,6 @@ typedef NS_ENUM(NSUInteger, AWAudioRecorderErrorCode) {
 - (void)awAudioRecorderDidStoppedRecording:(AWAudioRecorder *)audioRecorder;
 - (void)awAudioRecorderRecordingError:(AWAudioRecorder *)audioRecorder error:(NSError *)error;
 
-- (void)awAudioRecorder:(AWAudioRecorder *)audioRecorder currentVolume:(float)volume;
-
 
 @end
 
@@ -115,5 +113,7 @@ typedef NS_ENUM(NSUInteger, AWAudioRecorderErrorCode) {
  *  若当前不处在录音状态的话，无法停止录音，也不会调用任何回调函数
  */
 - (void)stopRecording;
+
+- (AudioQueueRef)getAudioQueue;
 
 @end

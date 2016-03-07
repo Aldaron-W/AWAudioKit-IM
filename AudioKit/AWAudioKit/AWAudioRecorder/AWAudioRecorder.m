@@ -17,7 +17,7 @@
 /**
  *  每次的音频输入队列缓存区所保存的是多少秒的数据
  */
-#define kAW_DefaultBufferDurationSeconds 0.5
+#define kAW_DefaultBufferDurationSeconds 0.1
 /**
  *  采样率，要转码为amr的话必须为8000
  */
@@ -94,12 +94,12 @@
     [self prepareAudioSession:&error];
     AW_RecallErrorAndReturn(error)
     
+    [self prepareRecordingDelegate:&error];
+    AW_RecallErrorAndReturn(error)
+    
     [self prepareRecordingEnvironment:&error];
     AW_RecallErrorAndReturn(error)
     
-    
-    [self prepareRecordingDelegate:&error];
-    AW_RecallErrorAndReturn(error)
     //开始录音
     AudioQueueStart(_audioQueue, NULL);
 //    if (errorCode != noErr) {
@@ -107,12 +107,20 @@
 //        return;
 //    }
     
+    if (self.delegate && [self.delegate respondsToSelector:@selector(awAudioRecorderDidStartRecording:)]) {
+        [self.delegate awAudioRecorderDidStartRecording:self];
+    }
+    
     self.isRecording = YES;
 }
 
 - (void)stopRecording{
     if (self.isRecording) {
         self.isRecording = NO;
+        
+        AudioQueueStop(_audioQueue, true);
+        AudioQueueDispose(_audioQueue, true);
+//        [[AVAudioSession sharedInstance] setActive:NO error:nil];
         
         //Recall
         if (self.delegate && [self.delegate respondsToSelector:@selector(awAudioRecorderDidStoppedRecording:)]) {
@@ -130,6 +138,10 @@
     
     [self setSampleRate:sampleRate];
     [self setBufferDurationSeconds:bufferDurationSeconds];
+}
+
+- (AudioQueueRef)getAudioQueue{
+    return _audioQueue;
 }
 
 #pragma mark - Private methods
@@ -177,7 +189,6 @@
     //设置AVAudioSession的Active状态
     [[AVAudioSession sharedInstance] setActive:YES error:error];
     AW_RecallErrorAndReturn(*error)
-    
     
     //TODO:从Delegate获取录音的Formate
     _recordFormat.mSampleRate = self.sampleRate;
@@ -293,10 +304,6 @@ void inputBufferHandler(void *inUserData, AudioQueueRef inAQ, AudioQueueBufferRe
     [self recallErrorInfo:error];
     
     if (self.isRecording) {
-        AudioQueueStop(_audioQueue, true);
-        AudioQueueDispose(_audioQueue, true);
-        [[AVAudioSession sharedInstance] setActive:NO error:nil];
-        
         [self stopRecording];
     }
 }
