@@ -45,6 +45,15 @@
 @required
 - (BOOL)completeWriteWithRecorder:(AWAudioRecorder*)recoder withIsError:(BOOL)isError;
 
+- (void)setFilePath:(NSString *)filePath;
+- (NSString *)filePath;
+
+- (void)setMaxFileSize:(double)fileSize;
+
+- (void)setMaxSecondCount:(double)maxSecondCount;
+
+- (double)recordedSecondCount;
+
 @end
 
 #endif /* AWFileWriterProtocol_h */
