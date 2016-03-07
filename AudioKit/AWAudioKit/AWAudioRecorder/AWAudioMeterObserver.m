@@ -71,7 +71,7 @@
 - (void)setAudioQueue:(AudioQueueRef)audioQueue{
     NSError *error = nil;
     
-    if ((_audioQueue!=NULL && audioQueue == _audioQueue) || (audioQueue==NULL)){
+    if ((_audioQueue!=NULL && audioQueue == _audioQueue)){
         //一样的就无需再处理
         return;
     }
@@ -82,6 +82,10 @@
     
     _audioQueue = audioQueue;
     
+    //处理停止监听的操作
+    if (audioQueue==NULL) {
+        return;
+    }
     
     //检测这玩意是否支持光谱图
     UInt32 val = 1;
@@ -123,7 +127,7 @@
     NSError *error = nil;
     UInt32 data_sz = (UInt32)(sizeof(AudioQueueLevelMeterState) * self.channelCount);
     
-    [AWAudioHelper getProperty:_audioQueue propertyID:kAudioQueueProperty_CurrentLevelMeterDB dataSize:&data_sz data:_levelMeterStates error:&error];
+    [AWAudioHelper getProperty:_audioQueue propertyID:kAudioQueueProperty_CurrentLevelMeter dataSize:&data_sz data:_levelMeterStates error:&error];
     AW_RecallErrorAndReturn(error);
     
     //转化成LevelMeterState数组传递到block
