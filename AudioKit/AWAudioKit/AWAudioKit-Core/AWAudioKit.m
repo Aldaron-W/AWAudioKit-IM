@@ -18,6 +18,7 @@
 
 //Private property
 @property (nonatomic, assign) AWAudioFormat audioFileType;
+@property (nonatomic, assign) NSString *audioFilePath;
 
 @property (nonatomic, assign) BOOL isRecordingPrepare;
 
@@ -28,10 +29,22 @@
 - (instancetype)init{
     self = [super init];
     if (self) {
-        
+        self.audioFileType = kAWAudioFormat_MP3;
     }
     
     return self;
+}
+
+- (void)startRecording{
+    if (self.audioFileType != kAWAudioFormat_None) {
+        [self prepareRecordingWithRecordingType:self.audioFileType];
+        
+        [self.recorder startRecording];
+    }
+}
+
+- (void)stopRecording{
+    [self.recorder stopRecording];
 }
 
 - (void)prepareRecordingWithRecordingType:(AWAudioFormat)recordingType{
@@ -48,16 +61,22 @@
     }
     
     self.recorder.fileWriterDelegate = self.fileWriter;
+    
+    [self prepareFileWriter];
+}
+
+- (void)prepareFileWriter{
+    [self.fileWriter setFilePath:[self createAudioFilePath]];
+    [self.fileWriter setMaxFileSize:1024*256];
+    [self.fileWriter setMaxSecondCount:60];
 }
 
 #pragma mark - Private
-- (NSString *)getAudioFilePath{
+- (NSString *)createAudioFilePath{
     NSString *path = @"";
-    if (self.isRecordingPrepare) {
-        path = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
-        NSString *fileName = [[NSProcessInfo processInfo] globallyUniqueString];
-        path = [path stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.%@",fileName, [self getAudioFilePostfix]]];
-    }
+    path = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
+    NSString *fileName = [[NSProcessInfo processInfo] globallyUniqueString];
+    path = [path stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.%@",fileName, [self getAudioFilePostfix]]];
     
     return path;
 }
@@ -77,26 +96,45 @@
 #pragma mark - Delegate
 #pragma mark AWAudioRecorderDelegate
 - (void)awAudioRecorderDidStartRecording:(AWAudioRecorder *)audioRecorder{
+    self.meterObserver.audioQueue = [audioRecorder getAudioQueue];
     
-}
-- (void)awAudioRecorderDidStoppedRecording:(AWAudioRecorder *)audioRecorder{
-    
-}
-- (void)awAudioRecorderRecordingError:(AWAudioRecorder *)audioRecorder error:(NSError *)error{
-    
+    if (self.delegate && [self.delegate respondsToSelector:@selector(audioRecorderRecordingWillBegin:)]) {
+        [self.delegate audioRecorderRecordingWillBegin:self];
+    }
 }
 
-- (void)awAudioRecorder:(AWAudioRecorder *)audioRecorder currentVolume:(float)volume{
+- (void)awAudioRecorderDidStoppedRecording:(AWAudioRecorder *)audioRecorder{
+    self.meterObserver.audioQueue = nil;
+    if (self.delegate && [self.delegate respondsToSelector:@selector(audioRecorderRecordingDidFinish:andFilePath:durtionOfAudioFile:error:)]) {
+        [self.delegate audioRecorderRecordingDidFinish:self andFilePath:[self.fileWriter filePath] durtionOfAudioFile:[self.fileWriter recordedSecondCount] error:nil];
+    }
+}
+
+- (void)awAudioRecorderRecordingError:(AWAudioRecorder *)audioRecorder error:(NSError *)error{
+    self.meterObserver.audioQueue = nil;
     
+    if (self.delegate && [self.delegate respondsToSelector:@selector(audioRecorder:recordingError:)]) {
+        [self.delegate audioRecorder:self recordingError:error];
+    }
 }
 
 #pragma mark AWAudioMeterObserverDelegate
 - (void)AWAudioMeterObserver:(AWAudioMeterObserver *)observer currentLevelMetterStates:(NSArray *)levelMeterStates{
+    AWLevelMeterState *levelMeterState = [levelMeterStates firstObject];
     
+    float volume = ([levelMeterState mAveragePower] * 10) / 0.5;
+    
+    
+    if (self.delegate && [self.delegate respondsToSelector:@selector(audioRecorder:currentRecordVolume:)]) {
+        [self.delegate audioRecorder:self currentRecordVolume:volume];
+    }
 }
 
 - (void)AWAudioMeterObserver:(AWAudioMeterObserver *)observer error:(NSError *)error{
-    
+    observer.audioQueue = nil;
+    if (self.delegate && [self.delegate respondsToSelector:@selector(audioRecorder:recordingError:)]) {
+        [self.delegate audioRecorder:self recordingError:error];
+    }
 }
 
 #pragma mark - Getter
@@ -114,6 +152,10 @@
         _meterObserver.delegate = self;
     }
     return _meterObserver;
+}
+
+- (BOOL)isRecording{
+    return [self.recorder isRecording];
 }
 
 @end

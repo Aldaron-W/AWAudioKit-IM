@@ -48,7 +48,7 @@ typedef enum : NSUInteger {
  *  @param durtion       录音的时长
  *  @param error         相关的异常信息（TODO：提示无存储空间等）
  */
-- (void)audioRecorderRecordingDidFinish:(AWAudioKit *)audioRecorder andFilePath:(NSURL *)filePath durtionOfAudioFile:(float)durtion error:(NSError *)error;
+- (void)audioRecorderRecordingDidFinish:(AWAudioKit *)audioRecorder andFilePath:(NSString *)filePath durtionOfAudioFile:(float)durtion error:(NSError *)error;
 
 #pragma mark Recroding Prooerty
 /**
@@ -79,7 +79,13 @@ typedef enum : NSUInteger {
 //Private property
 @property (nonatomic, assign, readonly) AWAudioFormat audioFileType;
 
+@property (nonatomic, assign, readonly) BOOL isRecording;
+
 #pragma mark - Public method
 - (void)prepareRecordingWithRecordingType:(AWAudioFormat)recordingType;
+
+- (void)startRecording;
+
+- (void)stopRecording;
 
 @end
