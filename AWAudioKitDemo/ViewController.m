@@ -17,7 +17,6 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
-    
 }
 
 - (void)didReceiveMemoryWarning {
@@ -27,12 +26,26 @@
 
 #pragma mark - AWAudioRecorderDelegate
 - (void)audioRecorder:(AWAudioKit *)audioRecorder currentRecordVolume:(float)volume{
-    
+
+}
+
+- (void)audioRecorderRecordingDidFinish:(AWAudioKit *)audioRecorder andFilePath:(NSString *)filePath durtionOfAudioFile:(float)durtion error:(NSError *)error{
+    NSLog(@"FilePath : %@ \n Durtion : %f \n ", filePath, durtion);
 }
 
 #pragma mark - Actions
 - (IBAction)recordButtonTouched:(id)sender {
-    NSLog(@"Begin Recording.......");
+    
+    if ([self.audioRecorder isRecording]) {
+        NSLog(@"Stop Recording.......");
+        [self.recordButton setTitle:@"录音" forState:UIControlStateNormal];
+        [self.audioRecorder stopRecording];
+    }
+    else{
+        NSLog(@"Begin Recording.......");
+        [self.recordButton setTitle:@"停止录音" forState:UIControlStateNormal];
+        [self.audioRecorder startRecording];
+    }
 }
 
 #pragma mark - Getter
