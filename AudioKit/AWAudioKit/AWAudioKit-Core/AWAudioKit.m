@@ -29,7 +29,7 @@
 - (instancetype)init{
     self = [super init];
     if (self) {
-        self.audioFileType = kAWAudioFormat_MP3;
+        self.audioFileType = kAWAudioFormat_CAF;
     }
     
     return self;
@@ -51,6 +51,10 @@
     switch (recordingType) {
         case kAWAudioFormat_MP3:{
             self.fileWriter = [MP3RecordWriter new];
+            break;
+        }
+        case kAWAudioFormat_CAF:{
+            self.fileWriter = [OtherTypeRecordWriter new];
             break;
         }
         default:{
@@ -86,7 +90,9 @@
         case kAWAudioFormat_MP3:
             return @"mp3";
             break;
-            
+        case kAWAudioFormat_CAF:{
+            return @"caf";
+        }
         default:
             return @"error";
             break;

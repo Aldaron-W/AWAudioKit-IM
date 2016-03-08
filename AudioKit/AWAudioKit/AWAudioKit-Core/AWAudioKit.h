@@ -18,6 +18,7 @@
 typedef enum : NSUInteger {
     kAWAudioFormat_None,
     kAWAudioFormat_MP3,
+    kAWAudioFormat_CAF,
 } AWAudioFormat;
 
 @class AWAudioKit;

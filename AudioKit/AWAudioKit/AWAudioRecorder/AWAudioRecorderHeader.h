@@ -19,6 +19,7 @@
 #import "AWFileWriterProtocol.h"
 //--MP3
 #import "MP3RecordWriter.h"
+#import "OtherTypeRecordWriter.h"
 
 
 #endif /* AWAudioRecorderHeader_h */

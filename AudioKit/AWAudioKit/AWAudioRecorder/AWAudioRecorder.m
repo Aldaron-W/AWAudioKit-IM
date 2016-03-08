@@ -123,6 +123,10 @@
 //        [[AVAudioSession sharedInstance] setActive:NO error:nil];
         
         //Recall
+        if (self.fileWriterDelegate && [self.fileWriterDelegate respondsToSelector:@selector(completeWriteWithRecorder:withIsError:)]) {
+            [self.fileWriterDelegate completeWriteWithRecorder:self withIsError:NO];
+        }
+        
         if (self.delegate && [self.delegate respondsToSelector:@selector(awAudioRecorderDidStoppedRecording:)]) {
             [self.delegate awAudioRecorderDidStoppedRecording:self];
         }
@@ -190,7 +194,6 @@
     [[AVAudioSession sharedInstance] setActive:YES error:error];
     AW_RecallErrorAndReturn(*error)
     
-    //TODO:从Delegate获取录音的Formate
     _recordFormat.mSampleRate = self.sampleRate;
 }
 
@@ -243,7 +246,8 @@ void inputBufferHandler(void *inUserData, AudioQueueRef inAQ, AudioQueueBufferRe
         if (pcmData&&pcmData.length>0) {
             //在后台串行队列中去处理文件写入
             dispatch_async(recorder.writeFileQueue, ^{
-                if(recorder.fileWriterDelegate&&![recorder.fileWriterDelegate writeIntoFileWithData:pcmData withRecorder:recorder inAQ:inAQ inStartTime:inStartTime inNumPackets:inNumPackets inPacketDesc:inPacketDesc]){
+                if(recorder.fileWriterDelegate &&
+                   ![recorder.fileWriterDelegate writeIntoFileWithData:pcmData withRecorder:recorder inAQ:inAQ inStartTime:inStartTime inNumPackets:inNumPackets inPacketDesc:inPacketDesc]){
                     //保证只处理了一次
                     if (dispatch_semaphore_wait(recorder.semError,DISPATCH_TIME_NOW)==0){
                         //回到主线程
@@ -295,6 +299,17 @@ void inputBufferHandler(void *inUserData, AudioQueueRef inAQ, AudioQueueBufferRe
         //至于为什么要这样。。。不知道。。。
         _recordFormat.mBytesPerPacket = _recordFormat.mBytesPerFrame = (_recordFormat.mBitsPerChannel / 8) * _recordFormat.mChannelsPerFrame;
         _recordFormat.mFramesPerPacket = 1;
+    }
+    else{
+        //这个屌属性不知道干啥的。，
+        _recordFormat.mFormatFlags = 0;
+        //每个通道里，一帧采集的bit数目
+        _recordFormat.mBitsPerChannel = 0;
+        //结果分析: 8bit为1byte，即为1个通道里1帧需要采集2byte数据，再*通道数，即为所有通道采集的byte数目。
+        //所以这里结果赋值给每帧需要采集的byte数目，然后这里的packet也等于一帧的数据。
+        //至于为什么要这样。。。不知道。。。
+        _recordFormat.mBytesPerPacket = 1024;
+        _recordFormat.mFramesPerPacket = 0;
     }
 }
 
