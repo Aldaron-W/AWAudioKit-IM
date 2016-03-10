@@ -10,7 +10,9 @@
 
 #import "AWAudioRecorderHeader.h"
 
-@interface AWAudioKit () <AWAudioRecorderDelegate, AWAudioMeterObserverDelegate>
+@interface AWAudioKit () <AWAudioRecorderDelegate, AWAudioMeterObserverDelegate>{
+    float _tempDurtion;//临时记录录音时间
+}
 
 @property (nonatomic, strong) AWAudioRecorder *recorder;
 @property (nonatomic, strong) AWAudioMeterObserver *meterObserver;
@@ -103,6 +105,7 @@
 #pragma mark AWAudioRecorderDelegate
 - (void)awAudioRecorderDidStartRecording:(AWAudioRecorder *)audioRecorder{
     self.meterObserver.audioQueue = [audioRecorder getAudioQueue];
+    _tempDurtion = 0.0;
     
     if (self.delegate && [self.delegate respondsToSelector:@selector(audioRecorderRecordingWillBegin:)]) {
         [self.delegate audioRecorderRecordingWillBegin:self];
@@ -111,6 +114,8 @@
 
 - (void)awAudioRecorderDidStoppedRecording:(AWAudioRecorder *)audioRecorder{
     self.meterObserver.audioQueue = nil;
+    _tempDurtion = 0.0;
+    
     if (self.delegate && [self.delegate respondsToSelector:@selector(audioRecorderRecordingDidFinish:andFilePath:durtionOfAudioFile:error:)]) {
         [self.delegate audioRecorderRecordingDidFinish:self andFilePath:[self.fileWriter filePath] durtionOfAudioFile:[self.fileWriter recordedSecondCount] error:nil];
     }
@@ -118,6 +123,7 @@
 
 - (void)awAudioRecorderRecordingError:(AWAudioRecorder *)audioRecorder error:(NSError *)error{
     self.meterObserver.audioQueue = nil;
+    _tempDurtion = 0.0;
     
     if (self.delegate && [self.delegate respondsToSelector:@selector(audioRecorder:recordingError:)]) {
         [self.delegate audioRecorder:self recordingError:error];
@@ -130,14 +136,20 @@
     
     float volume = ([levelMeterState mAveragePower] * 10) / 0.5;
     
-    
     if (self.delegate && [self.delegate respondsToSelector:@selector(audioRecorder:currentRecordVolume:)]) {
         [self.delegate audioRecorder:self currentRecordVolume:volume];
+    }
+    
+    _tempDurtion += observer.refreshInterval;
+    if (self.delegate && [self.delegate respondsToSelector:@selector(audioRecorder:currentRecordTime:)]) {
+        [self.delegate audioRecorder:self currentRecordTime:_tempDurtion];
     }
 }
 
 - (void)AWAudioMeterObserver:(AWAudioMeterObserver *)observer error:(NSError *)error{
     observer.audioQueue = nil;
+    _tempDurtion = 0.0;
+    
     if (self.delegate && [self.delegate respondsToSelector:@selector(audioRecorder:recordingError:)]) {
         [self.delegate audioRecorder:self recordingError:error];
     }

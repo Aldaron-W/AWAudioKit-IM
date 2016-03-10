@@ -46,6 +46,7 @@
     AudioQueueLevelMeterState	*_levelMeterStates;
 }
 
+@property (nonatomic, assign, readonly) NSTimeInterval refreshInterval; //刷新间隔,默认0.1
 @property (nonatomic, assign) AudioQueueRef audioQueue;
 @property (nonatomic, weak) id<AWAudioMeterObserverDelegate> delegate;
 

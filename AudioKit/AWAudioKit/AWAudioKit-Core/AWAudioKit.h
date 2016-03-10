@@ -46,7 +46,7 @@ typedef enum : NSUInteger {
  *
  *  @param audioRecorder AWAudioKit对象
  *  @param filePath      录音文件的路径
- *  @param durtion       录音的时长
+ *  @param durtion       录音的总时长
  *  @param error         相关的异常信息（TODO：提示无存储空间等）
  */
 - (void)audioRecorderRecordingDidFinish:(AWAudioKit *)audioRecorder andFilePath:(NSString *)filePath durtionOfAudioFile:(float)durtion error:(NSError *)error;
@@ -59,6 +59,14 @@ typedef enum : NSUInteger {
  *  @param volume        录音的分贝数（一般在50-80之间）
  */
 - (void)audioRecorder:(AWAudioKit *)audioRecorder currentRecordVolume:(float)volume;
+
+/**
+ *  在录音当中反馈录音的时长
+ *
+ *  @param audioRecorder AWAudioKit对象
+ *  @param volume        当前录音时长
+ */
+- (void)audioRecorder:(AWAudioKit *)audioRecorder currentRecordTime:(float)time;
 
 
 #pragma mark Recording Error

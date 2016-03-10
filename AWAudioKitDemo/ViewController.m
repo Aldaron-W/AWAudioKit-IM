@@ -29,6 +29,10 @@
 
 }
 
+- (void)audioRecorder:(AWAudioKit *)audioRecorder currentRecordTime:(float)time{
+    NSLog(@"Audio Recording Time : %.1f", time);
+}
+
 - (void)audioRecorderRecordingDidFinish:(AWAudioKit *)audioRecorder andFilePath:(NSString *)filePath durtionOfAudioFile:(float)durtion error:(NSError *)error{
     NSLog(@"FilePath : %@ \n Durtion : %f \n ", filePath, durtion);
 }
