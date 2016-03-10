@@ -9,6 +9,13 @@
 #import "OtherTypeRecordWriter.h"
 #import "AWAudioRecorder.h"
 
+@interface OtherTypeRecordWriter (){
+    AudioFileID _mFileID;
+    SInt64 _mCurrentPacket;
+}
+
+@end
+
 @implementation OtherTypeRecordWriter
 
 - (AudioStreamBasicDescription)customAudioFormatBeforeCreateFile{
@@ -24,7 +31,8 @@
     basicDescription.mFormatID = kAudioFormatLinearPCM;
     basicDescription.mFormatFlags = kLinearPCMFormatFlagIsSignedInteger | kAudioFormatFlagIsPacked;
     
-    return basicDescription;
+    self.basicDescription = basicDescription;
+    return self.basicDescription;
 }
 
 /**
@@ -38,7 +46,7 @@
     
     AudioStreamBasicDescription basicDescription = [self customAudioFormatBeforeCreateFile];
     
-    AudioFileCreateWithURL(url, kAudioFileCAFType, &basicDescription, kAudioFileFlags_EraseFile, &basicDescription.mFormatID);
+    AudioFileCreateWithURL(url, kAudioFileCAFType, &basicDescription, kAudioFileFlags_EraseFile, &_mFileID);
     
     CFRelease(url);
     
@@ -53,6 +61,10 @@
     [self.fileData appendData:data];
     self.recordedSecondCount += recoder.bufferDurationSeconds;
     
+    AudioFileWritePackets(_mFileID, FALSE, (UInt32)data.length,
+                          inPacketDesc, _mCurrentPacket, &inNumPackets, data.bytes);
+    _mCurrentPacket += inNumPackets;
+    
     return YES;
 }
 
@@ -61,7 +73,6 @@
  *
  */
 - (BOOL)completeWriteWithRecorder:(AWAudioRecorder*)recoder withIsError:(BOOL)isError{
-    [[NSFileManager defaultManager] createFileAtPath:self.filePath contents:self.fileData attributes:nil];
     return YES;
 }
 

@@ -17,5 +17,6 @@
 @property (nonatomic, assign) double maxSecondCount;
 @property (nonatomic, assign) double recordedSecondCount;
 @property (nonatomic, assign) unsigned long recordedFileSize;
+@property (nonatomic, assign) AudioStreamBasicDescription basicDescription;
 
 @end
