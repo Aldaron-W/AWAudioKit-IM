@@ -30,6 +30,22 @@
     lame_init_params(_lame);
 }
 
+- (AudioStreamBasicDescription)customAudioFormatBeforeCreateFile{
+    AudioStreamBasicDescription basicDescription;
+    memset(&basicDescription, 0, sizeof(basicDescription));
+    
+    basicDescription.mSampleRate = [AWRecordWriterHelper getDefultSampleRate];					// 采样率
+    basicDescription.mChannelsPerFrame = 1;		// 声道数（单声道）
+    basicDescription.mFramesPerPacket = 1;						// 一个数据包放一帧数据
+    basicDescription.mBitsPerChannel = 8;						// 每个声道中的每个采样点用8bit数据量化
+    basicDescription.mBytesPerFrame = (basicDescription.mBitsPerChannel / 8) * basicDescription.mChannelsPerFrame;	// 每帧的字节数(2个字节)
+    basicDescription.mBytesPerPacket = basicDescription.mBytesPerFrame * basicDescription.mFramesPerPacket;
+    basicDescription.mFormatID = kAudioFormatLinearPCM;
+    basicDescription.mFormatFlags = kLinearPCMFormatFlagIsSignedInteger | kAudioFormatFlagIsPacked;
+    
+    return basicDescription;
+}
+
 /**
  *  在录音开始时候建立文件和写入文件头信息等操作
  *
@@ -136,6 +152,15 @@
         lame_close(_lame);
         _lame = 0;
     }
+}
+
+/**
+ *  获取录音文件的后缀
+ *
+ *  @return 文件的后缀
+ */
+- (NSString *)fileSuffix{
+    return @"mp3";
 }
 
 @end

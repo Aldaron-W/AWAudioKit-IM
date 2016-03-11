@@ -7,6 +7,7 @@
 //
 
 #import <AudioToolbox/AudioToolbox.h>
+#import "AWRecordWriterHelper.h"
 
 @class AWAudioRecorder;
 
@@ -53,6 +54,12 @@
 - (void)setMaxSecondCount:(double)maxSecondCount;
 
 - (double)recordedSecondCount;
+/**
+ *  获取录音文件的后缀
+ *
+ *  @return 文件的后缀
+ */
+- (NSString *)fileSuffix;
 
 @end
 

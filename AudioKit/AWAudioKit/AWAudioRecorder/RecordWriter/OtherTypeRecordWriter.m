@@ -22,7 +22,7 @@
     AudioStreamBasicDescription basicDescription;
     memset(&basicDescription, 0, sizeof(basicDescription));
     
-    basicDescription.mSampleRate = 10000;					// 采样率
+    basicDescription.mSampleRate = [AWRecordWriterHelper getDefultSampleRate];					// 采样率
     basicDescription.mChannelsPerFrame = 1;		// 声道数（单声道）
     basicDescription.mFramesPerPacket = 1;						// 一个数据包放一帧数据
     basicDescription.mBitsPerChannel = 8;						// 每个声道中的每个采样点用8bit数据量化
@@ -74,6 +74,15 @@
  */
 - (BOOL)completeWriteWithRecorder:(AWAudioRecorder*)recoder withIsError:(BOOL)isError{
     return YES;
+}
+
+/**
+ *  获取录音文件的后缀
+ *
+ *  @return 文件的后缀
+ */
+- (NSString *)fileSuffix{
+    return @"caf";
 }
 
 @end
