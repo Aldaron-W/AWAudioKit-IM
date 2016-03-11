@@ -37,6 +37,11 @@
     NSLog(@"FilePath : %@ \n Durtion : %f \n ", filePath, durtion);
 }
 
+- (void)audioRecorder:(AWAudioKit *)audioRecorder recordingError:(NSError *)error{
+    NSLog(@"Stop Recording.......");
+    [self.recordButton setTitle:@"录音" forState:UIControlStateNormal];
+}
+
 #pragma mark - Actions
 - (IBAction)recordButtonTouched:(id)sender {
     
@@ -56,6 +61,7 @@
 - (AWAudioKit *)audioRecorder{
     if (!_audioRecorder) {
         _audioRecorder = [[AWAudioKit alloc] init];
+        [_audioRecorder prepareRecordingWithRecordingType:kAWAudioFormat_CAF];
         [_audioRecorder setDelegate:self];
     }
     return _audioRecorder;
