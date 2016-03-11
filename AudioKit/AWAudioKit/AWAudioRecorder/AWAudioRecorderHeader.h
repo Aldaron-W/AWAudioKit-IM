@@ -17,9 +17,11 @@
 
 //转码
 #import "AWFileWriterProtocol.h"
+//--AMR
+#import "AMRRecordWriter.h"
 //--MP3
 #import "MP3RecordWriter.h"
+//--CAF
 #import "OtherTypeRecordWriter.h"
-
 
 #endif /* AWAudioRecorderHeader_h */

@@ -193,8 +193,6 @@
     //设置AVAudioSession的Active状态
     [[AVAudioSession sharedInstance] setActive:YES error:error];
     AW_RecallErrorAndReturn(*error)
-    
-    _recordFormat.mSampleRate = self.sampleRate;
 }
 
 - (void)prepareRecordingDelegate:(NSError **)error{
@@ -215,11 +213,9 @@
     }else{
         [self setupAudioFormat:kAudioFormatLinearPCM SampleRate:self.sampleRate];
     }
-    _recordFormat.mSampleRate = self.sampleRate;
-    
     
     //建立文件,顺便同步下串行队列，防止意外前面有没处理的
-    __block BOOL isContinue = YES;;
+    __block BOOL isContinue = YES;
     dispatch_sync(self.writeFileQueue, ^{
         if(self.fileWriterDelegate&&![self.fileWriterDelegate createFileWithRecorder:self]){
             dispatch_async(dispatch_get_main_queue(),^{
@@ -241,7 +237,7 @@ void inputBufferHandler(void *inUserData, AudioQueueRef inAQ, AudioQueueBufferRe
 {
     AWAudioRecorder *recorder = (__bridge AWAudioRecorder*)inUserData;
     
-    if (inNumPackets > 0) {
+    if (inNumPackets > 0 && recorder.isRecording) {
         NSData *pcmData = [[NSData alloc]initWithBytes:inBuffer->mAudioData length:inBuffer->mAudioDataByteSize];
         if (pcmData&&pcmData.length>0) {
             //在后台串行队列中去处理文件写入
@@ -299,17 +295,6 @@ void inputBufferHandler(void *inUserData, AudioQueueRef inAQ, AudioQueueBufferRe
         //至于为什么要这样。。。不知道。。。
         _recordFormat.mBytesPerPacket = _recordFormat.mBytesPerFrame = (_recordFormat.mBitsPerChannel / 8) * _recordFormat.mChannelsPerFrame;
         _recordFormat.mFramesPerPacket = 1;
-    }
-    else{
-        //这个屌属性不知道干啥的。，
-        _recordFormat.mFormatFlags = 0;
-        //每个通道里，一帧采集的bit数目
-        _recordFormat.mBitsPerChannel = 0;
-        //结果分析: 8bit为1byte，即为1个通道里1帧需要采集2byte数据，再*通道数，即为所有通道采集的byte数目。
-        //所以这里结果赋值给每帧需要采集的byte数目，然后这里的packet也等于一帧的数据。
-        //至于为什么要这样。。。不知道。。。
-        _recordFormat.mBytesPerPacket = 1024;
-        _recordFormat.mFramesPerPacket = 0;
     }
 }
 

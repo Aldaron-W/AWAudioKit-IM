@@ -31,7 +31,7 @@
 - (instancetype)init{
     self = [super init];
     if (self) {
-        self.audioFileType = kAWAudioFormat_CAF;
+        
     }
     
     return self;
@@ -39,9 +39,14 @@
 
 - (void)startRecording{
     if (self.audioFileType != kAWAudioFormat_None) {
-        [self prepareRecordingWithRecordingType:self.audioFileType];
+//        [self prepareRecordingWithRecordingType:self.audioFileType];
         
         [self.recorder startRecording];
+    }
+    else{
+        if (self.delegate && [self.delegate respondsToSelector:@selector(audioRecorder:recordingError:)]) {
+            //Error 为设置录制音频的格式
+        }
     }
 }
 
@@ -59,6 +64,10 @@
             self.fileWriter = [OtherTypeRecordWriter new];
             break;
         }
+        case kAWAudioFormat_AMR:{
+            self.fileWriter = [AMRRecordWriter new];
+            break;
+        }
         default:{
             //若为无法识别类型的则无法初始化录音对象
             return;
@@ -66,6 +75,7 @@
         }
     }
     
+    self.audioFileType = recordingType;
     self.recorder.fileWriterDelegate = self.fileWriter;
     
     [self prepareFileWriter];
@@ -82,23 +92,9 @@
     NSString *path = @"";
     path = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
     NSString *fileName = [[NSProcessInfo processInfo] globallyUniqueString];
-    path = [path stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.%@",fileName, [self getAudioFilePostfix]]];
+    path = [path stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.%@",fileName, [[self fileWriter] fileSuffix]]];
     
     return path;
-}
-
-- (NSString *)getAudioFilePostfix{
-    switch (self.audioFileType) {
-        case kAWAudioFormat_MP3:
-            return @"mp3";
-            break;
-        case kAWAudioFormat_CAF:{
-            return @"caf";
-        }
-        default:
-            return @"error";
-            break;
-    }
 }
 
 #pragma mark - Delegate
