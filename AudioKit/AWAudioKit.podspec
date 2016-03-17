@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = "AWAudioKit"
-  s.version          = "0.1.0"
+  s.version          = "0.2.0"
   s.summary          = "AWKit"
   s.source           = { :path => "./" }
   s.social_media_url = 'http://www.aldaron.cn'
@@ -38,7 +38,7 @@ Pod::Spec.new do |s|
   ]
 
   s.resources = ''
-  s.default_subspec = "AWAudioKit-Core", "AWAudioRecorder"
+  s.default_subspec = "AWAudioKit-Core", "AWAudioRecorder", "AWAudioPlayer"
 
   ## subspecs
   s.subspec 'AWAudioKit-Core' do |ss|
@@ -58,6 +58,15 @@ Pod::Spec.new do |s|
     ss.resources = 'AWAudioKit/AWAudioRecorder/**/*.{png,xib,plist}'
     ss.vendored_frameworks = 'AWAudioKit/AWAudioRecorder/Libraries/**/*.framework'
     ss.vendored_libraries = 'AWAudioKit/AWAudioRecorder/Libraries/**/*.a'
+  end
+
+  s.subspec 'AWAudioPlayer' do |ss|
+    ss.header_dir = 'AWAudioKit/AWAudioPlayer/'
+    ss.public_header_files = 'AWAudioKit/AWAudioPlayer/**/*.h'
+    ss.source_files = 'AWAudioKit/AWAudioPlayer/**/*.{h,m}'
+    ss.resources = 'AWAudioKit/AWAudioPlayer/**/*.{png,xib,plist}'
+    ss.vendored_frameworks = 'AWAudioKit/AWAudioPlayer/Libraries/**/*.framework'
+    ss.vendored_libraries = 'AWAudioKit/AWAudioPlayer/Libraries/**/*.a'
   end
 
 
